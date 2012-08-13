@@ -2,7 +2,9 @@ module MooMoo
   class ParseOpenSRS < Faraday::Response::Middleware
 
     def on_complete(env)
-      env[:body] = parse_response(env[:body])
+      @env = env
+
+      @env[:body] = parsed_body
     end
 
     def response_values(env)
@@ -19,19 +21,20 @@ module MooMoo
     # hash containing all of the data. Elements with child elements
     # are converted into hashes themselves, with the :element_text entry
     # containing any raw text
-    #
-    # ==== Required
-    #  * <tt>data</tt> - data of the response
-    def parse_response(data)
-      doc = REXML::Document.new(data)
+    def parsed_body
+      build_xml_hash(body_elements)
+    end
 
-      values = {}
-
-      elements = doc.elements["/OPS_envelope/body/data_block/dt_assoc"].select { |item|
+    # Get only REXML elements from OpenSRS registry
+    def body_elements
+      body_as_document.elements["/OPS_envelope/body/data_block/dt_assoc"].select do |item|
         item.is_a? REXML::Element
-      }
+      end
+    end
 
-      build_xml_hash(elements)
+    # Convert OpenSRS registry body to a REXML::Document object
+    def body_as_document
+      @body_as_document ||= REXML::Document.new(@env[:body])
     end
 
     # Builds a hash from a collection of XML elements
