@@ -41,17 +41,17 @@ module MooMoo
     def build_xml_hash(elements)
       data_hash = {}
 
-      elements.each do |elem|
-        key = elem.attributes['key']
+      elements.each do |element|
+        key = element.attributes['key']
 
-        if elem.elements.size > 0
+        if element.elements.size > 0
           if key.nil?
-            data_hash.merge!(build_xml_hash(elem.elements))
+            data_hash.merge!(build_xml_hash(element.elements))
           else
-            data_hash[key] = build_xml_hash(elem.elements)
+            data_hash[key] = build_xml_hash(element.elements)
           end
         else
-          data_hash[key] = elem.text unless key.nil?
+          data_hash[key] = element.text unless key.nil?
         end
       end
 
